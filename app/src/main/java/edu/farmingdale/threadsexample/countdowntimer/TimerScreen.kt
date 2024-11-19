@@ -70,8 +70,8 @@ fun TimerScreen(
                 )
             }
 
-            // Change text color and weight based on remaining time
-            val isLastTenSeconds = timerViewModel.remainingMillis <= 10000
+            // Only show red text if timer is running and in last 10 seconds
+            val isLastTenSeconds = timerViewModel.isRunning && timerViewModel.remainingMillis <= 10000
             Text(
                 text = timerText(timerViewModel.remainingMillis),
                 fontSize = 60.sp,
