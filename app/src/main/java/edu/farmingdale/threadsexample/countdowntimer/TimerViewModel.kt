@@ -34,10 +34,15 @@ class TimerViewModel : ViewModel() {
     var isRunning by mutableStateOf(false)
         private set
 
+    // Store last selected time for reset functionality
+    private var lastSelectedTime = Triple(0, 0, 0)
+
     fun selectTime(hour: Int, min: Int, sec: Int) {
         selectedHour = hour
         selectedMinute = min
         selectedSecond = sec
+        // Store the selected time for reset
+        lastSelectedTime = Triple(hour, min, sec)
     }
 
     fun startTimer() {
@@ -66,6 +71,14 @@ class TimerViewModel : ViewModel() {
             isRunning = false
             remainingMillis = 0
         }
+    }
+
+    fun resetTimer() {
+        // Reset to the last selected time values
+        selectedHour = lastSelectedTime.first
+        selectedMinute = lastSelectedTime.second
+        selectedSecond = lastSelectedTime.third
+        remainingMillis = 0
     }
 
     override fun onCleared() {

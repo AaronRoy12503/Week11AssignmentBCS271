@@ -9,10 +9,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -46,18 +47,17 @@ fun TimerScreen(
         Box(
             modifier = modifier
                 .padding(20.dp)
-                .size(300.dp),  // Fixed size for the container
+                .size(300.dp),
             contentAlignment = Alignment.Center
         ) {
             if (timerViewModel.isRunning) {
-                // Calculate progress from 1.0 to 0.0
                 val initialMillis = remember { timerViewModel.remainingMillis.toFloat() }
                 val progress = (timerViewModel.remainingMillis / initialMillis).toFloat()
 
                 val animatedProgress by animateFloatAsState(
                     targetValue = progress,
                     animationSpec = tween(
-                        durationMillis = 1000,  // 1 second animation
+                        durationMillis = 1000,
                         easing = LinearEasing
                     ),
                     label = "Progress Animation"
@@ -67,7 +67,7 @@ fun TimerScreen(
                     progress = { animatedProgress },
                     modifier = Modifier.size(300.dp),
                     strokeWidth = 8.dp,
-                    color = Color(0xFF6200EE)  // Purple primary color
+                    color = Color(0xFF6200EE)
                 )
             }
             Text(
@@ -81,14 +81,28 @@ fun TimerScreen(
             hour = timerViewModel.selectedHour,
             min = timerViewModel.selectedMinute,
             sec = timerViewModel.selectedSecond,
-            onTimePick = timerViewModel::selectTime
+            onTimePick = timerViewModel::selectTime,
+            enabled = !timerViewModel.isRunning
         )
         if (timerViewModel.isRunning) {
-            Button(
-                onClick = timerViewModel::cancelTimer,
-                modifier = modifier.padding(50.dp)
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(50.dp)
             ) {
-                Text("Cancel")
+                Button(onClick = timerViewModel::cancelTimer) {
+                    Text("Cancel")
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Button(
+                    onClick = {
+                        timerViewModel.cancelTimer()
+                        timerViewModel.resetTimer()
+                    }
+                ) {
+                    Text("Reset")
+                }
             }
         } else {
             Button(
@@ -116,9 +130,9 @@ fun TimePicker(
     hour: Int = 0,
     min: Int = 0,
     sec: Int = 0,
+    enabled: Boolean = true,
     onTimePick: (Int, Int, Int) -> Unit = { _: Int, _: Int, _: Int -> }
 ) {
-    // Values must be remembered for calls to onPick()
     var hourVal by remember { mutableIntStateOf(hour) }
     var minVal by remember { mutableIntStateOf(min) }
     var secVal by remember { mutableIntStateOf(sec) }
@@ -132,6 +146,7 @@ fun TimePicker(
             NumberPickerWrapper(
                 initVal = hourVal,
                 maxVal = 99,
+                enabled = enabled,
                 onNumPick = {
                     hourVal = it
                     onTimePick(hourVal, minVal, secVal)
@@ -145,6 +160,7 @@ fun TimePicker(
             Text("Minutes")
             NumberPickerWrapper(
                 initVal = minVal,
+                enabled = enabled,
                 onNumPick = {
                     minVal = it
                     onTimePick(hourVal, minVal, secVal)
@@ -155,6 +171,7 @@ fun TimePicker(
             Text("Seconds")
             NumberPickerWrapper(
                 initVal = secVal,
+                enabled = enabled,
                 onNumPick = {
                     secVal = it
                     onTimePick(hourVal, minVal, secVal)
@@ -169,6 +186,7 @@ fun NumberPickerWrapper(
     initVal: Int = 0,
     minVal: Int = 0,
     maxVal: Int = 59,
+    enabled: Boolean = true,
     onNumPick: (Int) -> Unit = {}
 ) {
     val numFormat = NumberPicker.Formatter { i: Int ->
@@ -183,7 +201,11 @@ fun NumberPickerWrapper(
                 maxValue = maxVal
                 value = initVal
                 setFormatter(numFormat)
+                isEnabled = enabled
             }
+        },
+        update = { picker ->
+            picker.isEnabled = enabled
         }
     )
 }
