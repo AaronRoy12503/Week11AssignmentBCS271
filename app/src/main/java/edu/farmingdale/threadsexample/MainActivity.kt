@@ -26,5 +26,4 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// ToDo 7: Play a sound when the timer reaches 0
 // ToDo 8: During the last 10 seconds, make the text red and bold

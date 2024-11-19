@@ -51,8 +51,7 @@ fun TimerScreen(
             contentAlignment = Alignment.Center
         ) {
             if (timerViewModel.isRunning) {
-                val initialMillis = remember { timerViewModel.remainingMillis.toFloat() }
-                val progress = (timerViewModel.remainingMillis / initialMillis).toFloat()
+                val progress = timerViewModel.remainingMillis.toFloat() / timerViewModel.totalMillis.toFloat()
 
                 val animatedProgress by animateFloatAsState(
                     targetValue = progress,
@@ -70,10 +69,14 @@ fun TimerScreen(
                     color = Color(0xFF6200EE)
                 )
             }
+
+            // Change text color and weight based on remaining time
+            val isLastTenSeconds = timerViewModel.remainingMillis <= 10000
             Text(
                 text = timerText(timerViewModel.remainingMillis),
                 fontSize = 60.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = if (isLastTenSeconds) FontWeight.ExtraBold else FontWeight.Bold,
+                color = if (isLastTenSeconds) Color.Red else Color.Unspecified,
                 textAlign = TextAlign.Center
             )
         }
@@ -81,8 +84,8 @@ fun TimerScreen(
             hour = timerViewModel.selectedHour,
             min = timerViewModel.selectedMinute,
             sec = timerViewModel.selectedSecond,
-            onTimePick = timerViewModel::selectTime,
-            enabled = !timerViewModel.isRunning
+            enabled = !timerViewModel.isRunning,
+            onTimePick = timerViewModel::selectTime
         )
         if (timerViewModel.isRunning) {
             Row(
