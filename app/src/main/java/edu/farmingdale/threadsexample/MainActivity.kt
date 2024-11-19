@@ -26,7 +26,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// ToDo 3: Start the application using the CountDownActivity
 // ToDo 4: Make the Text of the timer larger
 // ToDo 5: Show a visual indicator of the timer going down to 0
 // ToDo 6: Add a button to rest the timer
