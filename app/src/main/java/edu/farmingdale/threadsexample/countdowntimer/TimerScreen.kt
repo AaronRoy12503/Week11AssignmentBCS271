@@ -50,8 +50,13 @@ fun TimerScreen(
                 .size(300.dp),
             contentAlignment = Alignment.Center
         ) {
-            if (timerViewModel.isRunning) {
-                val progress = timerViewModel.remainingMillis.toFloat() / timerViewModel.totalMillis.toFloat()
+            if (timerViewModel.isRunning || timerViewModel.remainingMillis == 0L) {
+                val progress = if (timerViewModel.remainingMillis == 0L && !timerViewModel.isRunning) {
+                    0f
+                } else {
+                    (timerViewModel.remainingMillis.toFloat() / timerViewModel.totalMillis.toFloat())
+                        .coerceIn(0f, 1f)  // Ensure progress stays between 0 and 1
+                }
 
                 val animatedProgress by animateFloatAsState(
                     targetValue = progress,
@@ -70,7 +75,6 @@ fun TimerScreen(
                 )
             }
 
-            // Only show red text if timer is running and in last 10 seconds
             val isLastTenSeconds = timerViewModel.isRunning && timerViewModel.remainingMillis <= 10000
             Text(
                 text = timerText(timerViewModel.remainingMillis),
