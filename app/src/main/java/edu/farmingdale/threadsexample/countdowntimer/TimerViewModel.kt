@@ -1,5 +1,7 @@
 package edu.farmingdale.threadsexample.countdowntimer
 
+import android.content.Context
+import android.media.MediaPlayer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -7,12 +9,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import edu.farmingdale.threadsexample.R
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class TimerViewModel : ViewModel() {
     private var timerJob: Job? = null
+    private var mediaPlayer: MediaPlayer? = null
 
     // Values selected in time picker
     var selectedHour by mutableIntStateOf(0)
@@ -37,19 +41,20 @@ class TimerViewModel : ViewModel() {
     // Store last selected time for reset functionality
     private var lastSelectedTime = Triple(0, 0, 0)
 
+    fun initializeMediaPlayer(context: Context) {
+        mediaPlayer = MediaPlayer.create(context, R.raw.timer_finish)
+    }
+
     fun selectTime(hour: Int, min: Int, sec: Int) {
         selectedHour = hour
         selectedMinute = min
         selectedSecond = sec
-        // Store the selected time for reset
         lastSelectedTime = Triple(hour, min, sec)
     }
 
     fun startTimer() {
-        // Convert hours, minutes, and seconds to milliseconds
         totalMillis = (selectedHour * 60 * 60 + selectedMinute * 60 + selectedSecond) * 1000L
 
-        // Start coroutine that makes the timer count down
         if (totalMillis > 0) {
             isRunning = true
             remainingMillis = totalMillis
@@ -61,6 +66,16 @@ class TimerViewModel : ViewModel() {
                 }
 
                 isRunning = false
+                playTimerFinishSound()
+            }
+        }
+    }
+
+    private fun playTimerFinishSound() {
+        mediaPlayer?.apply {
+            if (!isPlaying) {
+                seekTo(0)
+                start()
             }
         }
     }
@@ -70,11 +85,12 @@ class TimerViewModel : ViewModel() {
             timerJob?.cancel()
             isRunning = false
             remainingMillis = 0
+            mediaPlayer?.stop()
+            mediaPlayer?.prepare()
         }
     }
 
     fun resetTimer() {
-        // Reset to the last selected time values
         selectedHour = lastSelectedTime.first
         selectedMinute = lastSelectedTime.second
         selectedSecond = lastSelectedTime.third
@@ -84,5 +100,7 @@ class TimerViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         timerJob?.cancel()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 }

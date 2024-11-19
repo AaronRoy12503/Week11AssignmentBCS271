@@ -20,7 +20,6 @@ import androidx.work.WorkRequest
 import androidx.work.workDataOf
 import edu.farmingdale.threadsexample.ui.theme.ThreadsExampleTheme
 
-
 class CountDownActivity : ComponentActivity() {
 
     private val timerViewModel = TimerViewModel()
@@ -33,6 +32,10 @@ class CountDownActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize MediaPlayer
+        timerViewModel.initializeMediaPlayer(this)
+
         enableEdgeToEdge()
         setContent {
             ThreadsExampleTheme(dynamicColor = false) {
@@ -73,7 +76,7 @@ class CountDownActivity : ComponentActivity() {
     private fun startWorker(millisRemain: Long) {
         val timerWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<TimerWorker>()
             .setInputData(
-                `workDataOf`(
+                workDataOf(
                     KEY_MILLIS_REMAINING.toString() to millisRemain
                 )
             ).build()
